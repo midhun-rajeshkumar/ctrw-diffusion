@@ -1,0 +1,20 @@
+# Example configuration for the CTRW diffusion pipeline.
+# Copy this file, adjust the values, and pass it to the command line interface.
+# Every value here also has a sensible default in the program, so the file is
+# optional and may be partial.
+
+simulation:
+  n_particles: 500        # number of independent trajectories
+  n_steps: 1000           # number of jumps per trajectory
+  seed: 42                # random seed for full reproducibility
+  waiting_time:
+    kind: exponential     # "exponential" (normal) or "pareto" (anomalous)
+    scale: 1.0
+    exponent: 1.5         # only used when kind is "pareto"
+  jump:
+    kind: gaussian        # "gaussian" (normal) or "pareto" (Levy-like)
+    scale: 1.0
+    exponent: 1.5         # only used when kind is "pareto"
+
+analysis:
+  n_time_points: 50       # number of points on the MSD curve
