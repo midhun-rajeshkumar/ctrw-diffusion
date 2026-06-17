@@ -87,3 +87,80 @@ def test_unknown_waiting_time_kind_raises():
     generator = make_generator()
     with pytest.raises(ValueError):
         distributions.draw_waiting_times(generator, size=10, kind="not_a_kind")
+
+
+def test_pareto_waiting_times_respect_minimum_scale():
+    """Heavy-tailed waiting times are bounded below by the scale.
+
+    GIVEN: a seeded generator and the Pareto waiting-time distribution
+    WHEN: a sample is drawn with a given scale
+    THEN: every waiting time is at least that scale
+    """
+    generator = make_generator()
+    result = distributions.draw_waiting_times(
+        generator, size=500, kind="pareto", scale=2.0, exponent=1.5
+    )
+    assert np.all(result >= 2.0)
+
+
+def test_pareto_jumps_take_both_signs():
+    """Heavy-tailed jumps remain symmetric in direction.
+
+    GIVEN: a seeded generator and the Pareto jump distribution
+    WHEN: a large sample is drawn
+    THEN: both positive and negative jumps appear
+    """
+    generator = make_generator()
+    result = distributions.draw_jumps(generator, size=1000, kind="pareto")
+    assert np.any(result > 0)
+    assert np.any(result < 0)
+
+
+def test_unknown_jump_kind_raises():
+    """An unsupported jump distribution name is reported clearly.
+
+    GIVEN: a seeded generator and an invalid distribution name
+    WHEN: jumps are requested
+    THEN: a ValueError is raised
+    """
+    generator = make_generator()
+    with pytest.raises(ValueError):
+        distributions.draw_jumps(generator, size=10, kind="not_a_kind")
+
+
+def test_non_positive_size_raises():
+    """A non-positive sample size is rejected.
+
+    GIVEN: a seeded generator
+    WHEN: a sample of size zero is requested
+    THEN: a ValueError is raised
+    """
+    generator = make_generator()
+    with pytest.raises(ValueError):
+        distributions.draw_waiting_times(generator, size=0)
+
+
+def test_non_positive_scale_raises():
+    """A non-positive scale is rejected.
+
+    GIVEN: a seeded generator
+    WHEN: a negative scale is supplied
+    THEN: a ValueError is raised
+    """
+    generator = make_generator()
+    with pytest.raises(ValueError):
+        distributions.draw_jumps(generator, size=10, scale=-1.0)
+
+
+def test_non_positive_pareto_exponent_raises():
+    """A non-positive Pareto exponent is rejected.
+
+    GIVEN: a seeded generator and the Pareto distribution
+    WHEN: a non-positive exponent is supplied
+    THEN: a ValueError is raised
+    """
+    generator = make_generator()
+    with pytest.raises(ValueError):
+        distributions.draw_waiting_times(
+            generator, size=10, kind="pareto", exponent=0.0
+        )
